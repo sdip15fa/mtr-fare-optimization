@@ -25,6 +25,11 @@ This web application helps users find the cheapest way to travel on the Hong Kon
 
 The application uses MTR fare data stored in `public/mtr_lines_fares.csv`. *Note: The accuracy of calculations depends on the data in this file.*
 
+## Programmer
+
+- 99% gemini 2.5 pro exp
+- 1% me (this section is written by me)
+
 ## Getting Started
 
 1.  **Clone the repository:**
