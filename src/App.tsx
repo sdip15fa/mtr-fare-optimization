@@ -460,6 +460,12 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
           <Typography variant="caption" display="block" gutterBottom>
             <span dangerouslySetInnerHTML={{ __html: '<a href="https://www.flaticon.com/free-icons/savings" title="savings icons" target="_blank" rel="noopener noreferrer" style="color: inherit;">Savings icons created by Freepik - Flaticon</a>' }} />
           </Typography>
+          {/* GitHub Link */}
+          <Typography variant="caption" display="block">
+             <a href="https://github.com/sdip15fa/mtr-fare-optimization" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+               View on GitHub
+             </a>
+          </Typography>
         </Box>
       </Container>
     </>
