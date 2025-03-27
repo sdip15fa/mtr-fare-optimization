@@ -455,6 +455,12 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
              <Typography sx={{ mt: 3 }} align="center">{error || t('errorNoRoutes')}</Typography>
          )}
         </Paper>
+        {/* Icon Attribution */}
+        <Box sx={{ mt: 2, textAlign: 'center', fontSize: '0.8rem', color: 'text.secondary' }}>
+          <Typography variant="caption" display="block" gutterBottom>
+            <span dangerouslySetInnerHTML={{ __html: '<a href="https://www.flaticon.com/free-icons/savings" title="savings icons" target="_blank" rel="noopener noreferrer" style="color: inherit;">Savings icons created by Freepik - Flaticon</a>' }} />
+          </Typography>
+        </Box>
       </Container>
     </>
   );
