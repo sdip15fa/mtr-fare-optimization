@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import {
   Container,
   Typography,
@@ -17,6 +18,9 @@ import {
   List, // Added
   ListItem, // Added
   ListItemText, // Added
+  ToggleButton, // Added for language switcher
+  ToggleButtonGroup, // Added for language switcher
+  Divider, // Added for visual separation
 } from '@mui/material';
 import {
   loadFareData,
@@ -41,7 +45,6 @@ const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
 ];
 
 function App() {
-  const [stations, setStations] = useState<string[]>([]);
   const [startStation, setStartStation] = useState<string | null>(null);
   const [destStation, setDestStation] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(paymentMethodOptions[0].value); // Default to Adult Octopus
@@ -55,52 +58,100 @@ type RouteResult = {
   isDirect?: boolean;
 };
 const [results, setResults] = useState<RouteResult[] | null>(null);
-const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { t, i18n } = useTranslation(); // Get translation function and i18n instance
 
-// Load fare data on component mount
+  // --- Station Name Translation ---
+  // Store original English names internally, display translated names
+  const [originalStations, setOriginalStations] = useState<string[]>([]);
+
+  // Memoize mapping from original English name to translated name
+  const stationEnToLocaleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    originalStations.forEach(station => {
+      map.set(station, t(`stations.${station}`, station)); // Fallback to original if translation missing
+    });
+    return map;
+  }, [originalStations, t]); // Recompute if stations load or language changes
+
+  // Memoize mapping from translated name back to original English name
+  const stationLocaleToEnMap = useMemo(() => {
+    const map = new Map<string, string>();
+    stationEnToLocaleMap.forEach((localeName, enName) => {
+      map.set(localeName, enName);
+    });
+    return map;
+  }, [stationEnToLocaleMap]);
+
+  // Memoize the list of translated station names for Autocomplete options
+  const translatedStationOptions = useMemo(() => {
+    return Array.from(stationEnToLocaleMap.values()).sort((a, b) => a.localeCompare(b)); // Sort translated names
+  }, [stationEnToLocaleMap]);
+  // --- End Station Name Translation ---
+
+
+  // Load fare data on component mount
   useEffect(() => {
     async function fetchData() {
       try {
         setError(null);
         setLoading(true);
         await loadFareData();
-        setStations(getStationList());
+        // Store the original English names from the service
+        const originalList = getStationList();
+        setOriginalStations(originalList);
+        // setStations is no longer needed directly, use translatedStationOptions
       } catch (err) {
-        console.error('Failed to load fare data:', err);
-        setError('Failed to load fare data. Please check the console or try refreshing.');
+        console.error(t('errorLoadingData'), err);
+        setError(t('errorLoadingData'));
       } finally {
         setLoading(false);
       }
     }
     fetchData();
-  }, []); // Empty dependency array ensures this runs only once
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]); // Add t to dependency array to reload stations if language changes? Maybe not needed if map recomputes. Let's omit for now.
 
   const handlePaymentMethodChange = (event: SelectChangeEvent<PaymentMethod>) => {
     setPaymentMethod(event.target.value as PaymentMethod);
   };
 
+  const handleLanguageChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newLanguage: string | null,
+  ) => {
+    if (newLanguage !== null) {
+      i18n.changeLanguage(newLanguage);
+      // Clear results when language changes as station names in results need re-translation
+      setResults(null);
+      setError(null);
+    }
+  };
+
   const handleCalculate = () => {
+    // startStation and destStation now store the original English names
     if (!startStation || !destStation || !paymentMethod) {
-      setError('Please select start station, destination, and payment method.');
+      setError(t('errorSelectStations'));
       return;
     }
     if (startStation === destStation) {
-        setError('Start and destination stations cannot be the same.');
+        setError(t('errorSameStation'));
         return;
     }
 
-    setError(null);
+    setError(null); // Clear previous errors
     setCalculating(true);
     setResults(null); // Clear previous results
 
     // --- Fare Calculation Logic ---
     console.log('Calculating fare for:', startStation, 'to', destStation, 'via', paymentMethod);
 
+    // Use the stored English names to get IDs
     const startId = getStationId(startStation);
     const destId = getStationId(destStation);
 
     if (!startId || !destId) {
-        setError('Could not find station IDs. Data might be inconsistent.');
+        setError(t('errorStationId'));
         setCalculating(false);
         return;
     }
@@ -109,18 +160,20 @@ const [error, setError] = useState<string | null>(null);
     const directFare = getFare(startId, destId, paymentMethod);
 
     // 2. Find Cheaper Intermediate Routes
-    const cheaperOptions: { station: string; fare: number }[] = [];
+    const cheaperOptions: { station: string; fare: number }[] = []; // station here is original English name
     const directFareValue = directFare === undefined ? Infinity : directFare;
 
-    for (const intermediateStationName of stations) {
-      // Skip if the intermediate is the start or destination
-      if (intermediateStationName === startStation || intermediateStationName === destStation) {
+    // Iterate using the original English station names
+    for (const intermediateEnName of originalStations) {
+      // Skip if the intermediate is the start or destination (using English names)
+      if (intermediateEnName === startStation || intermediateEnName === destStation) {
         continue;
       }
 
-      const intermediateId = getStationId(intermediateStationName);
+      const intermediateId = getStationId(intermediateEnName);
       if (!intermediateId) {
-        console.warn(`Could not find ID for intermediate station: ${intermediateStationName}`);
+        // Use t() for console warning if desired, but keep internal logic simple
+        console.warn(`Could not find ID for intermediate station: ${intermediateEnName}`);
         continue; // Skip if ID not found
       }
 
@@ -133,7 +186,8 @@ const [error, setError] = useState<string | null>(null);
 
         // Only consider routes strictly cheaper than the direct route
         if (totalIntermediateFare < directFareValue) {
-          cheaperOptions.push({ station: intermediateStationName, fare: totalIntermediateFare });
+          // Store the original English name
+          cheaperOptions.push({ station: intermediateEnName, fare: totalIntermediateFare });
         }
       }
     }
@@ -225,7 +279,8 @@ const [error, setError] = useState<string | null>(null);
 
     // Update state
     if (finalResults.length === 0) {
-        setError("Could not calculate any valid routes.");
+        // Use translated error message
+        setError(t('errorNoRoutes'));
     } else {
         setResults(finalResults);
     }
@@ -238,16 +293,36 @@ const [error, setError] = useState<string | null>(null);
     return (
       <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 5 }}>
         <CircularProgress />
-        <Typography>Loading fare data...</Typography>
+        <Typography>{t('loadingData')}</Typography>
       </Container>
     );
   }
 
+  // Get current language for the toggle button state
+  const currentLanguage = i18n.language.startsWith('zh') ? 'zh-Hant' : 'en';
+
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
+       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+         <ToggleButtonGroup
+            value={currentLanguage}
+            exclusive
+            onChange={handleLanguageChange}
+            aria-label="language selection"
+            size="small"
+          >
+            <ToggleButton value="en" aria-label="English">
+              EN
+            </ToggleButton>
+            <ToggleButton value="zh-Hant" aria-label="Traditional Chinese">
+              繁
+            </ToggleButton>
+          </ToggleButtonGroup>
+       </Box>
+
       <Paper elevation={3} sx={{ p: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          MTR Fare Optimizer
+          {t('appTitle')}
         </Typography>
 
         {error && (
@@ -260,13 +335,15 @@ const [error, setError] = useState<string | null>(null);
           {/* Start Station */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <Autocomplete
-              options={stations}
-              value={startStation}
+              options={translatedStationOptions} // Use translated options
+              value={startStation ? stationEnToLocaleMap.get(startStation) || null : null} // Display translated value
               onChange={(event, newValue) => {
-                setStartStation(newValue);
+                // When selection changes, find the original English name and store it
+                const originalName = newValue ? stationLocaleToEnMap.get(newValue) || null : null;
+                setStartStation(originalName);
               }}
               renderInput={(params) => (
-                <TextField {...params} label="Start Station" variant="outlined" fullWidth />
+                <TextField {...params} label={t('startStationLabel')} variant="outlined" fullWidth />
               )}
             />
           </Grid>
@@ -274,13 +351,15 @@ const [error, setError] = useState<string | null>(null);
           {/* Destination Station */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <Autocomplete
-              options={stations}
-              value={destStation}
+              options={translatedStationOptions} // Use translated options
+              value={destStation ? stationEnToLocaleMap.get(destStation) || null : null} // Display translated value
               onChange={(event, newValue) => {
-                setDestStation(newValue);
+                 // When selection changes, find the original English name and store it
+                const originalName = newValue ? stationLocaleToEnMap.get(newValue) || null : null;
+                setDestStation(originalName);
               }}
               renderInput={(params) => (
-                <TextField {...params} label="Destination Station" variant="outlined" fullWidth />
+                <TextField {...params} label={t('destStationLabel')} variant="outlined" fullWidth />
               )}
             />
           </Grid>
@@ -288,16 +367,17 @@ const [error, setError] = useState<string | null>(null);
           {/* Payment Method */}
           <Grid size={{ xs: 12, sm: 8 }}>
             <FormControl fullWidth variant="outlined">
-              <InputLabel id="payment-method-label">Payment Method</InputLabel>
+              <InputLabel id="payment-method-label">{t('paymentMethodLabel')}</InputLabel>
               <Select
                 labelId="payment-method-label"
                 value={paymentMethod}
                 onChange={handlePaymentMethodChange}
-                label="Payment Method"
+                label={t('paymentMethodLabel')} // Ensure label is translated
               >
                 {paymentMethodOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
-                    {option.label}
+                    {/* Translate payment method labels */}
+                    {t(`paymentMethods.${option.value}`, option.label)}
                   </MenuItem>
                 ))}
               </Select>
@@ -314,7 +394,7 @@ const [error, setError] = useState<string | null>(null);
               fullWidth
               sx={{ height: '56px' }} // Match text field height
             >
-              {calculating ? <CircularProgress size={24} /> : 'Calculate Fare'}
+              {calculating ? <CircularProgress size={24} /> : t('calculateButton')}
             </Button>
           </Grid>
         </Grid>
@@ -322,22 +402,26 @@ const [error, setError] = useState<string | null>(null);
         {/* Result Display */}
         {results && results.length > 0 && (
           <Box sx={{ mt: 3 }}>
+             <Divider sx={{ my: 2 }} /> {/* Add a divider */}
             <Typography variant="h6" component="h2" gutterBottom>
-              Fare Options:
+              {t('resultsTitle')}
             </Typography>
             <List dense>
               {results.map((route, index) => {
                 const isDirect = route.station === null;
+                 // Translate station name for display, fallback to original English name
+                const displayStationName = route.station ? t(`stations.${route.station}`, route.station) : '';
+
                 const label = isDirect
-                  ? `Direct Route: $${route.fare.toFixed(2)}`
-                  : `Via ${route.station}: $${route.fare.toFixed(2)}`;
+                  ? `${t('directRouteLabel')}: $${route.fare.toFixed(2)}`
+                  : `${t('viaLabel')} ${displayStationName}: $${route.fare.toFixed(2)}`;
 
                 let style = {};
                 let secondaryText = null;
 
                 if (route.isCheapest) {
                   style = { color: 'green', fontWeight: 'bold' };
-                  secondaryText = 'Cheapest Option';
+                  secondaryText = t('cheapestOptionLabel');
                 } else if (isDirect) {
                   style = { color: 'darkblue' }; // Style for direct route if not cheapest
                 }
@@ -356,10 +440,9 @@ const [error, setError] = useState<string | null>(null);
           </Box>
         )}
          {/* Message if calculation ran but found nothing */}
-         {results && results.length === 0 && (
-             <Typography sx={{ mt: 3 }} align="center">{error || "No routes found."}</Typography>
+         {results && results.length === 0 && !calculating && ( // Only show if not calculating
+             <Typography sx={{ mt: 3 }} align="center">{error || t('errorNoRoutes')}</Typography>
          )}
-         {/* Clear specific message about direct being cheapest if list shows it */}
       </Paper>
     </Container>
   );

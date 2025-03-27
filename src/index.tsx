@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { Suspense } from 'react'; // Import Suspense
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import './i18n'; // Import the i18n configuration
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    {/* Wrap App in Suspense for loading translations */}
+    <Suspense fallback="Loading...">
+      <App />
+    </Suspense>
   </React.StrictMode>
 );
 
