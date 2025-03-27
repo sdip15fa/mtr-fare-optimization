@@ -32,6 +32,7 @@ export type PaymentMethod =
 // Store the parsed data
 let fareData: FareRecord[] = [];
 let stationList: string[] = [];
+let stationIdToNameMap: Map<string, string> = new Map(); // Map ID to Name
 let fareMap: Map<string, number> = new Map(); // Key: "SRC_ID-DEST_ID-PAYMENT_METHOD", Value: Fare
 
 // Function to load and parse the CSV data
@@ -70,6 +71,16 @@ export async function loadFareData(): Promise<void> {
           });
           stationList = Array.from(stations).sort();
 
+          // Populate station ID to Name map
+          fareData.forEach(record => {
+            if (!stationIdToNameMap.has(record.SRC_STATION_ID)) {
+              stationIdToNameMap.set(record.SRC_STATION_ID, record.SRC_STATION_NAME);
+            }
+            if (!stationIdToNameMap.has(record.DEST_STATION_ID)) {
+              stationIdToNameMap.set(record.DEST_STATION_ID, record.DEST_STATION_NAME);
+            }
+          });
+
           // Populate the fare map for quick lookups (consider all payment methods)
           const paymentMethods: PaymentMethod[] = [
             'OCT_ADT_FARE', 'OCT_STD_FARE', 'OCT_JOYYOU_SIXTY_FARE',
@@ -104,6 +115,11 @@ export async function loadFareData(): Promise<void> {
 // Function to get the list of stations
 export function getStationList(): string[] {
   return stationList;
+}
+
+// Function to get the station name from its ID
+export function getStationName(stationId: string): string | undefined {
+    return stationIdToNameMap.get(stationId);
 }
 
 // Function to get the station ID from its name

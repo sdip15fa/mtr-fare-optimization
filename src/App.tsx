@@ -22,7 +22,9 @@ import {
   ToggleButton, // Added for language switcher
   ToggleButtonGroup, // Added for language switcher
   Divider, // Added for visual separation
+  Link, // Added for navigation
 } from '@mui/material';
+import SavingsPage from './components/SavingsPage'; // Import the new component
 import {
   loadFareData,
   getStationList,
@@ -46,19 +48,20 @@ const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
 ];
 
 function App() {
+  const [currentPage, setCurrentPage] = useState<'calculator' | 'savings'>('calculator'); // State for page view
   const [startStation, setStartStation] = useState<string | null>(null);
   const [destStation, setDestStation] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(paymentMethodOptions[0].value); // Default to Adult Octopus
   const [loading, setLoading] = useState<boolean>(true);
   const [calculating, setCalculating] = useState<boolean>(false);
-// Store results as an array of objects with type info
-type RouteResult = {
-  station: string | null; // null indicates direct route
-  fare: number;
-  isCheapest?: boolean;
-  isDirect?: boolean;
-};
-const [results, setResults] = useState<RouteResult[] | null>(null);
+  // Store results as an array of objects with type info
+  type RouteResult = {
+    station: string | null; // null indicates direct route
+    fare: number;
+    isCheapest?: boolean;
+    isDirect?: boolean;
+  };
+  const [results, setResults] = useState<RouteResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { t, i18n } = useTranslation(); // Get translation function and i18n instance
 
@@ -290,9 +293,15 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
     // --- End Calculation Logic ---
   };
 
+  const navigateToSavings = () => setCurrentPage('savings');
+  const navigateToCalculator = () => setCurrentPage('calculator');
+
   useLayoutEffect(() => {
-    document.title = t('htmlTitle')
-  }, [t])
+    // Update title based on current page
+    document.title = currentPage === 'calculator'
+      ? t('htmlTitle')
+      : t('savingsPageHtmlTitle', 'MTR Savings Routes'); // Add translation key
+  }, [t, currentPage]);
 
   if (loading) {
     return (
@@ -310,7 +319,7 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
     <> {/* Wrap content in a fragment */}
       <Helmet key={i18n.language}> {/* Add key prop */}
         <html lang={i18n.language.split('-')[0]} /> {/* Set html lang attribute */}
-        <title>{t('htmlTitle')}</title>
+        {/* Title is now set in useLayoutEffect */}
         <meta name="description" content={t('metaDescription')} />
       </Helmet>
       <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -331,12 +340,25 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
           </ToggleButtonGroup>
        </Box>
 
-      <Paper elevation={3} sx={{ p: 3 }}>
+      {/* Navigation Links/Buttons */}
+      <Box sx={{ mt: 3, mb: 2, textAlign: 'center' }}>
+        {currentPage === 'calculator' ? (
+          <Link component="button" variant="body1" onClick={navigateToSavings} sx={{ mx: 1 }}>
+            {t('viewSavingsPageLink', 'View All Routes with Savings')}
+          </Link>
+        ) : (
+          <Link component="button" variant="body1" onClick={navigateToCalculator} sx={{ mx: 1 }}>
+            {t('backToCalculatorLink', 'Back to Fare Calculator')}
+          </Link>
+        )}
+      </Box>
+      {/* Conditionally render Calculator UI */}
+      <Paper elevation={3} sx={{ p: 3, display: currentPage === 'calculator' ? 'block' : 'none' }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
-          {t('appTitle')}
+          {t('appTitle')} {/* Title for calculator */}
         </Typography>
 
-        {error && (
+        {error && currentPage === 'calculator' && ( // Only show calculator errors here
           <Typography color="error" align="center" sx={{ mb: 2 }}>
             {error}
           </Typography>
@@ -455,6 +477,10 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
              <Typography sx={{ mt: 3 }} align="center">{error || t('errorNoRoutes')}</Typography>
          )}
         </Paper>
+
+        {/* Conditionally render Savings Page */}
+        {currentPage === 'savings' && <SavingsPage />}
+
         {/* Icon Attribution */}
         <Box sx={{ mt: 2, textAlign: 'center', fontSize: '0.8rem', color: 'text.secondary' }}>
           <Typography variant="caption" display="block" gutterBottom>

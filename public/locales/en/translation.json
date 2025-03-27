@@ -125,5 +125,22 @@
     "Heng On": "Heng On",
     "Ma On Shan": "Ma On Shan",
     "Wu Kai Sha": "Wu Kai Sha"
+  },
+  "viewSavingsPageLink": "View All Routes with Savings",
+  "backToCalculatorLink": "Back to Fare Calculator",
+  "savingsPageTitle": "Routes with Savings",
+  "savingsPageHtmlTitle": "MTR Savings Routes",
+  "savings": {
+    "calculating": "Calculating Savings...",
+    "error": "Error loading or calculating savings:",
+    "noSavingsFound": "No routes with significant savings found for the selected payment method.",
+    "header": {
+      "from": "From",
+      "to": "To",
+      "via": "Via (Optimal)",
+      "directFare": "Direct Fare ($)",
+      "splitFare": "Split Fare ($)",
+      "saving": "Saving ($)"
+    }
   }
 }

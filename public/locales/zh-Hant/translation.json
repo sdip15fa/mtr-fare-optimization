@@ -125,5 +125,22 @@
     "Heng On": "恆安",
     "Ma On Shan": "馬鞍山",
     "Wu Kai Sha": "烏溪沙"
+  },
+  "viewSavingsPageLink": "查看所有慳錢路線",
+  "backToCalculatorLink": "返回車費計算機",
+  "savingsPageTitle": "慳錢路線列表",
+  "savingsPageHtmlTitle": "港鐵慳錢路線",
+  "savings": {
+    "calculating": "正在計算慳錢路線...",
+    "error": "載入或計算慳錢路線時發生錯誤:",
+    "noSavingsFound": "找不到適用於所選付款方式的慳錢路線。",
+    "header": {
+      "from": "由",
+      "to": "到",
+      "via": "經 (最慳)",
+      "directFare": "直接車費 ($)",
+      "splitFare": "分段車費 ($)",
+      "saving": "節省 ($)"
+    }
   }
 }
