@@ -1,4 +1,6 @@
 {
+  "htmlTitle": "MTR Fare Optimizer | Find Cheaper Routes",
+  "metaDescription": "Calculate Hong Kong MTR fares and discover potential savings by checking intermediate stops. Optimize your journey and save money.",
   "appTitle": "MTR Fare Optimizer",
   "startStationLabel": "Start Station",
   "destStationLabel": "Destination Station",

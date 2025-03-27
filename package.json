@@ -17,13 +17,14 @@
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/react-helmet-async": "^1.0.3",
     "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^8.0.4",
     "i18next-http-backend": "^3.0.2",
     "papaparse": "^5.5.2",
-    "pdf-parse": "^1.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-helmet": "^6.1.0",
     "react-i18next": "^15.4.1",
     "react-scripts": "5.0.1",
     "typescript": "^5.8.2",
@@ -54,6 +55,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-helmet": "^6.1.11",
     "ts-node": "^10.9.2"
   }
 }

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import React, { useState, useEffect, useMemo, useLayoutEffect } from 'react'; // Added useMemo
 import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { Helmet } from 'react-helmet'; // Import Helmet
 import {
   Container,
   Typography,
@@ -289,6 +290,10 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
     // --- End Calculation Logic ---
   };
 
+  useLayoutEffect(() => {
+    document.title = t('htmlTitle')
+  }, [t])
+
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 5 }}>
@@ -302,9 +307,15 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
   const currentLanguage = i18n.language.startsWith('zh') ? 'zh-Hant' : 'en';
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-         <ToggleButtonGroup
+    <> {/* Wrap content in a fragment */}
+      <Helmet key={i18n.language}> {/* Add key prop */}
+        <html lang={i18n.language.split('-')[0]} /> {/* Set html lang attribute */}
+        <title>{t('htmlTitle')}</title>
+        <meta name="description" content={t('metaDescription')} />
+      </Helmet>
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <ToggleButtonGroup
             value={currentLanguage}
             exclusive
             onChange={handleLanguageChange}
@@ -443,8 +454,9 @@ const [results, setResults] = useState<RouteResult[] | null>(null);
          {results && results.length === 0 && !calculating && ( // Only show if not calculating
              <Typography sx={{ mt: 3 }} align="center">{error || t('errorNoRoutes')}</Typography>
          )}
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </>
   );
 }
 

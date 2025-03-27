@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react'; // Import Suspense
 import ReactDOM from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async'; // Import HelmetProvider
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -10,10 +11,12 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    {/* Wrap App in Suspense for loading translations */}
-    <Suspense fallback="Loading...">
-      <App />
-    </Suspense>
+    <HelmetProvider> {/* Wrap with HelmetProvider */}
+      {/* Wrap App in Suspense for loading translations */}
+      <Suspense fallback="Loading...">
+        <App />
+      </Suspense>
+    </HelmetProvider>
   </React.StrictMode>
 );
 
