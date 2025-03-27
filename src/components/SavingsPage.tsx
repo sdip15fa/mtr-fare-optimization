@@ -284,11 +284,12 @@ const SavingsPage: React.FC = () => {
                                     key={`${row.startStationId}-${row.destStationId}-${row.intermediateStationId}-${index}`} // More unique key
                                     sx={{ '&:nth-of-type(odd)': { backgroundColor: '#fafafa' } }}
                                 >
+                                    {/* Translate station names using the 'stations.' prefix */}
                                     <TableCell component="th" scope="row">
-                                        {row.startStationName}
+                                        {t(`stations.${row.startStationName}`, row.startStationName)}
                                     </TableCell>
-                                    <TableCell>{row.destStationName}</TableCell>
-                                    <TableCell>{row.intermediateStationName}</TableCell>
+                                    <TableCell>{t(`stations.${row.destStationName}`, row.destStationName)}</TableCell>
+                                    <TableCell>{t(`stations.${row.intermediateStationName}`, row.intermediateStationName)}</TableCell>
                                     <TableCell align="right">{row.directFare.toFixed(2)}</TableCell>
                                     <TableCell align="right">{row.intermediateFare.toFixed(2)}</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 'bold', color: 'green' }}>
