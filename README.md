@@ -1,46 +1,58 @@
-# Getting Started with Create React App
+# MTR Fare Optimization Calculator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This web application helps users find the cheapest way to travel on the Hong Kong MTR system by comparing the direct fare between two stations with potential two-leg journeys via intermediate stations.
+
+## Features
+
+*   **Station Selection:** Choose your start and destination MTR stations from an autocomplete dropdown.
+*   **Payment Methods:** Select from various payment types (e.g., Adult Octopus, Student Octopus, Single Journey Ticket) to see the relevant fare.
+*   **Fare Calculation:**
+    *   Calculates the direct fare for the selected route and payment method.
+    *   Identifies potentially cheaper routes by splitting the journey at an intermediate station.
+*   **Results Display:** Shows the cheapest option found (highlighted) and the direct fare (if different and applicable), up to a maximum of 5 relevant options.
+*   **Internationalization:** Supports English (EN) and Traditional Chinese (繁).
+*   **Responsive Design:** Built with Material UI for usability across different screen sizes.
+
+## Tech Stack
+
+*   [React](https://reactjs.org/)
+*   [TypeScript](https://www.typescriptlang.org/)
+*   [Material UI](https://mui.com/)
+*   [i18next](https://www.i18next.com/) / [react-i18next](https://react.i18next.com/)
+*   [PapaParse](https://www.papaparse.com/) (for parsing CSV fare data)
+
+## Data Source
+
+The application uses MTR fare data stored in `public/mtr_lines_fares.csv`. *Note: The accuracy of calculations depends on the data in this file.*
+
+## Getting Started
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/sdip15fa/mtr-fare-optimization.git
+    cd mtr-fare-optimization
+    ```
+2.  **Install dependencies:**
+    ```bash
+    yarn install
+    ```
+3.  **Run the development server:**
+    ```bash
+    yarn start
+    ```
+    The application will be available at [http://localhost:3000](http://localhost:3000).
 
 ## Available Scripts
 
-In the project directory, you can run:
+*   **`yarn start`**: Runs the app in development mode.
+*   **`yarn build`**: Builds the app for production to the `build` folder.
+*   **`yarn test`**: Launches the test runner in interactive watch mode.
 
-### `yarn start`
+## Attribution
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+*   **Icon:** [Savings icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/savings)
+*   **Source Code:** [View on GitHub](https://github.com/sdip15fa/mtr-fare-optimization)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## License
 
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
