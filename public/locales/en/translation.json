@@ -17,6 +17,7 @@
   "directRouteLabel": "Direct Route",
   "viaLabel": "Via",
   "cheapestOptionLabel": "Cheapest Option",
+  "firstClassFareLabel": "First Class Fare",
   "paymentMethods": {
     "OCT_ADT_FARE": "Adult Octopus",
     "OCT_STD_FARE": "Student Octopus",

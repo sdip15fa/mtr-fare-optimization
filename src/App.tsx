@@ -31,6 +31,7 @@ import {
   getStationId,
   getFare,
   PaymentMethod,
+  calculateFirstClassFare,
 } from './data/fareService';
 import './App.css'; // Keep existing styles if any
 
@@ -47,6 +48,15 @@ const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
   { value: 'SINGLE_CON_ELDERLY_FARE', label: 'Elderly Single Journey' },
 ];
 
+// Update RouteResult type to include first class fare
+type RouteResult = {
+  station: string | null; // null indicates direct route
+  fare: number;
+  firstClassFare?: number;
+  isCheapest?: boolean;
+  isDirect?: boolean;
+};
+
 function App() {
   const [currentPage, setCurrentPage] = useState<'calculator' | 'savings'>('calculator'); // State for page view
   const [startStation, setStartStation] = useState<string | null>(null);
@@ -55,12 +65,6 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [calculating, setCalculating] = useState<boolean>(false);
   // Store results as an array of objects with type info
-  type RouteResult = {
-    station: string | null; // null indicates direct route
-    fare: number;
-    isCheapest?: boolean;
-    isDirect?: boolean;
-  };
   const [results, setResults] = useState<RouteResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { t, i18n } = useTranslation(); // Get translation function and i18n instance
@@ -162,6 +166,7 @@ function App() {
 
     // 1. Get Direct Fare
     const directFare = getFare(startId, destId, paymentMethod);
+    const directFirstClassFare = calculateFirstClassFare(startStation, destStation, paymentMethod);
 
     // 2. Find Cheaper Intermediate Routes
     const cheaperOptions: { station: string; fare: number }[] = []; // station here is original English name
@@ -198,13 +203,20 @@ function App() {
 
     // Add direct route if valid
     const directRoute: RouteResult | null = directFare !== undefined
-        ? { station: null, fare: directFare, isDirect: true }
+        ? { 
+            station: null, 
+            fare: directFare, 
+            firstClassFare: directFirstClassFare,
+            isDirect: true 
+          }
         : null;
 
     // Add cheaper intermediate routes
     const intermediateRoutes: RouteResult[] = cheaperOptions.map(opt => ({
         station: opt.station,
         fare: opt.fare,
+        firstClassFare: calculateFirstClassFare(startStation, opt.station, paymentMethod) + 
+                       calculateFirstClassFare(opt.station, destStation, paymentMethod)
     }));
 
     // Combine and sort all potential options initially
@@ -464,7 +476,16 @@ function App() {
                     <ListItemText
                       primary={label}
                       primaryTypographyProps={{ style: style }}
-                      secondary={secondaryText}
+                      secondary={
+                        <>
+                          {secondaryText && <div>{secondaryText}</div>}
+                          {route.firstClassFare && (
+                            <div style={{ color: '#666' }}>
+                              {t('firstClassFareLabel')}: ${route.firstClassFare.toFixed(2)}
+                            </div>
+                          )}
+                        </>
+                      }
                     />
                   </ListItem>
                 );

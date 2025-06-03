@@ -17,6 +17,7 @@
   "directRouteLabel": "直接路線",
   "viaLabel": "經",
   "cheapestOptionLabel": "最平選項",
+  "firstClassFareLabel": "頭等車費",
   "paymentMethods": {
     "OCT_ADT_FARE": "成人八達通",
     "OCT_STD_FARE": "學生八達通",
