@@ -9,7 +9,20 @@ export interface MTRLine {
   nameZh: string;
   color: string;
   textColor: string; // For contrast on colored backgrounds
-  stations: string[]; // Station names in order
+  stations: string[]; // All stations (trunk + all branch stations)
+  branches?: BranchStructure; // Optional: divergent route branches
+}
+
+export interface BranchStructure {
+  branchPoint: string; // Station where line splits
+  trunk: string[]; // Common stations before branch point (including branch point)
+  branches: Branch[]; // All branches from the branch point
+}
+
+export interface Branch {
+  name: string; // Branch endpoint name (e.g., "Lo Wu", "Lok Ma Chau")
+  nameZh: string; // Chinese name
+  stations: string[]; // Stations on this branch (after branch point)
 }
 
 interface StationCSVRow {
@@ -151,33 +164,110 @@ export async function loadStationData(): Promise<void> {
       const lineDirections = lineStationsMap.get(lineId);
 
       let stations: string[] = [];
+      let branchStructure: BranchStructure | undefined;
 
       if (lineDirections) {
-        // Find the direction with sequence starting from 1 (typically DT or base direction)
-        let selectedDirection: Array<{ station: string; sequence: number }> | undefined;
-
-        lineDirections.forEach((stationsData) => {
-          if (!selectedDirection) {
-            const sortedStations = stationsData.sort((a, b) => a.sequence - b.sequence);
-            if (sortedStations.length > 0 && sortedStations[0].sequence === 1) {
-              selectedDirection = sortedStations;
-            }
+        // Identify all DT (downtrack) directions
+        const dtDirections: string[] = [];
+        lineDirections.forEach((_, direction) => {
+          if (direction === 'DT' || direction.endsWith('-DT')) {
+            dtDirections.push(direction);
           }
         });
 
-        // If no direction starts with sequence 1, just take the first one
-        if (!selectedDirection && lineDirections.size > 0) {
-          selectedDirection = Array.from(lineDirections.values())[0].sort((a, b) => a.sequence - b.sequence);
-        }
+        // If there are multiple DT directions, this line has branches
+        if (dtDirections.length > 1) {
+          // Get all station sets for each direction
+          const directionStationSets = dtDirections.map(dir => {
+            const dirStations = lineDirections.get(dir)!;
+            return {
+              direction: dir,
+              stations: dirStations.sort((a, b) => a.sequence - b.sequence).map(s => s.station),
+              stationSet: new Set(dirStations.map(s => s.station))
+            };
+          });
 
-        if (selectedDirection) {
-          stations = selectedDirection.map(s => s.station);
+          // Find common stations (intersection of all directions)
+          const commonStationSet = new Set(directionStationSets[0].stations);
+          directionStationSets.slice(1).forEach(({ stationSet }) => {
+            commonStationSet.forEach(station => {
+              if (!stationSet.has(station)) {
+                commonStationSet.delete(station);
+              }
+            });
+          });
+
+          // Find branch point (first common station where routes converge)
+          // The branches are before this point, trunk is after
+          let branchPointStation = '';
+          const firstDirStations = directionStationSets[0].stations;
+
+          // Find first common station (where divergent routes merge into trunk)
+          for (let i = 0; i < firstDirStations.length; i++) {
+            if (commonStationSet.has(firstDirStations[i])) {
+              branchPointStation = firstDirStations[i];
+              break;
+            }
+          }
+
+          if (branchPointStation) {
+            // Build trunk (common stations from branch point onwards)
+            const branchPointIndex = firstDirStations.indexOf(branchPointStation);
+            const trunk: string[] = firstDirStations.slice(branchPointIndex);
+
+            // Build branches (unique stations BEFORE branch point for each direction)
+            const branches: Branch[] = [];
+
+            directionStationSets.forEach(({ direction, stations: dirStations }) => {
+              const dirBranchIndex = dirStations.indexOf(branchPointStation);
+              if (dirBranchIndex > 0) {
+                // Get stations before the branch point (these are unique to this branch)
+                const branchStations = dirStations.slice(0, dirBranchIndex);
+
+                // Get the endpoint (first station) as the branch name
+                const branchEndpoint = branchStations[0];
+                const chineseNameRow = parseResult.data.find(
+                  row => row['English Name'] === branchEndpoint && row['Line Code'] === lineId
+                );
+
+                branches.push({
+                  name: branchEndpoint,
+                  nameZh: chineseNameRow?.['Chinese Name'] || branchEndpoint,
+                  stations: branchStations,
+                });
+              }
+            });
+
+            if (branches.length > 0) {
+              branchStructure = {
+                branchPoint: branchPointStation,
+                trunk: trunk,
+                branches: branches,
+              };
+
+              // For stations array, include trunk + all unique branch stations
+              const stationSet = new Set(trunk);
+              branches.forEach(branch => {
+                branch.stations.forEach(s => stationSet.add(s));
+              });
+              stations = Array.from(stationSet);
+            }
+          }
+        } else {
+          // No branches, just use the regular DT direction
+          const baseDirStations = lineDirections.get('DT') || Array.from(lineDirections.values())[0];
+          if (baseDirStations) {
+            stations = baseDirStations
+              .sort((a, b) => a.sequence - b.sequence)
+              .map(({ station }) => station);
+          }
         }
       }
 
       return {
         ...metadata,
         stations,
+        branches: branchStructure,
       };
     });
 
