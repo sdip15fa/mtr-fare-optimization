@@ -153,26 +153,23 @@ export async function loadStationData(): Promise<void> {
       let stations: string[] = [];
 
       if (lineDirections) {
-        // Find the direction with sequence starting from 1 (typically DT or base direction)
-        let selectedDirection: Array<{ station: string; sequence: number }> | undefined;
+        // Collect all unique stations from all directions to handle divergent routes
+        // (e.g., East Rail Line has both Lo Wu and Lok Ma Chau branches)
+        const stationMap = new Map<string, number>();
 
         lineDirections.forEach((stationsData) => {
-          if (!selectedDirection) {
-            const sortedStations = stationsData.sort((a, b) => a.sequence - b.sequence);
-            if (sortedStations.length > 0 && sortedStations[0].sequence === 1) {
-              selectedDirection = sortedStations;
+          stationsData.forEach(({ station, sequence }) => {
+            // Keep the minimum sequence number for each station (for ordering)
+            if (!stationMap.has(station) || stationMap.get(station)! > sequence) {
+              stationMap.set(station, sequence);
             }
-          }
+          });
         });
 
-        // If no direction starts with sequence 1, just take the first one
-        if (!selectedDirection && lineDirections.size > 0) {
-          selectedDirection = Array.from(lineDirections.values())[0].sort((a, b) => a.sequence - b.sequence);
-        }
-
-        if (selectedDirection) {
-          stations = selectedDirection.map(s => s.station);
-        }
+        // Sort stations by their sequence number to maintain proper order
+        stations = Array.from(stationMap.entries())
+          .sort((a, b) => a[1] - b[1])
+          .map(([station]) => station);
       }
 
       return {
