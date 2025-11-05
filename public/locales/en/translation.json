@@ -130,6 +130,9 @@
   "backToCalculatorLink": "Back to Fare Calculator",
   "savingsPageTitle": "Routes with Savings",
   "savingsPageHtmlTitle": "MTR Savings Routes",
+  "close": "Close",
+  "searchStations": "Search stations...",
+  "stationsFound": "station(s) found",
   "savings": {
     "calculating": "Calculating Savings...",
     "error": "Error loading or calculating savings:",

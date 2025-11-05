@@ -130,6 +130,9 @@
   "backToCalculatorLink": "返回車費計算機",
   "savingsPageTitle": "慳錢路線列表",
   "savingsPageHtmlTitle": "港鐵慳錢路線",
+  "close": "關閉",
+  "searchStations": "搜尋車站...",
+  "stationsFound": "個車站",
   "savings": {
     "calculating": "正在計算慳錢路線...",
     "error": "載入或計算慳錢路線時發生錯誤:",
