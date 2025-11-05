@@ -112,6 +112,10 @@ const SavingsPage: React.FC = () => {
     const calculateSavings = async () => {
       setIsLoading(true);
       setError(null);
+
+      // Defer heavy computation to next tick to allow loading UI to render
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       try {
         await loadFareData();
         const allRecords = getAllFareRecords();
@@ -183,6 +187,11 @@ const SavingsPage: React.FC = () => {
                 });
               }
             }
+          }
+
+          // Yield to UI thread periodically to keep interface responsive
+          if (i % 10 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 0));
           }
         }
 
