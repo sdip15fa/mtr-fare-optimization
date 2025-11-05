@@ -383,7 +383,7 @@ function App() {
                       }}
                       sx={{
                         position: { xs: 'static', md: 'absolute' },
-                        left: { md: '-50%' },
+                        left: { md: 0 },
                         transform: { xs: 'rotate(90deg)', md: 'translateX(-50%)' },
                         backgroundColor: 'white',
                         border: '2px solid #667eea',
@@ -393,6 +393,7 @@ function App() {
                           color: 'white',
                         },
                         mb: { xs: 2, md: 0 },
+                        zIndex: 1,
                       }}
                     >
                       <SwapHorizIcon />
