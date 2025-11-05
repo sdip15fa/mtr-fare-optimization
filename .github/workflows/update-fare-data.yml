@@ -1,4 +1,4 @@
-name: Update MTR Fare Data
+name: Update MTR Data
 
 on:
   schedule:
@@ -16,17 +16,22 @@ jobs:
       - name: Download latest MTR fare data CSV
         run: |
           curl -L -o public/mtr_lines_fares.csv "https://res.data.gov.hk/api/get-download-file?name=https%3A%2F%2Fopendata.mtr.com.hk%2Fdata%2Fmtr_lines_fares.csv"
-          echo "CSV downloaded."
+          echo "Fare data CSV downloaded."
+
+      - name: Download latest MTR stations data CSV
+        run: |
+          curl -L -o public/mtr_lines_and_stations.csv "https://opendata.mtr.com.hk/data/mtr_lines_and_stations.csv"
+          echo "Stations data CSV downloaded."
 
       - name: Check for changes
         id: git-check
         run: |
           git status --porcelain
           if [[ -z $(git status --porcelain) ]]; then
-            echo "No changes detected in CSV file."
+            echo "No changes detected in CSV files."
             echo "changed=false" >> $GITHUB_OUTPUT
           else
-            echo "CSV file has changed. Proceeding with commit."
+            echo "CSV files have changed. Proceeding with commit."
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
@@ -35,6 +40,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add public/mtr_lines_fares.csv
-          git commit -m "Update MTR fare data CSV"
+          git add public/mtr_lines_fares.csv public/mtr_lines_and_stations.csv
+          git commit -m "Update MTR data CSVs (fares and stations)"
           git push

@@ -33,7 +33,7 @@ import {
   getFare,
   PaymentMethod,
 } from './data/fareService';
-import { getLinesForStation } from './data/mtrLines';
+import { getLinesForStation, loadStationData } from './data/mtrLines';
 import './App.css';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import DirectionsIcon from '@mui/icons-material/Directions';
@@ -71,13 +71,13 @@ function App() {
   const { t, i18n } = useTranslation();
 
 
-  // Load fare data on component mount
+  // Load fare and station data on component mount
   useEffect(() => {
     async function fetchData() {
       try {
         setError(null);
         setLoading(true);
-        await loadFareData();
+        await Promise.all([loadFareData(), loadStationData()]);
       } catch (err) {
         console.error(t('errorLoadingData'), err);
         setError(t('errorLoadingData'));
