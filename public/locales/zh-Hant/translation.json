@@ -137,6 +137,8 @@
     "calculating": "正在計算慳錢路線...",
     "error": "載入或計算慳錢路線時發生錯誤:",
     "noSavingsFound": "找不到適用於所選付款方式的慳錢路線。",
+    "filterTitle": "按付款方式篩選",
+    "totalRoutes": "個慳錢路線",
     "header": {
       "from": "由",
       "to": "到",

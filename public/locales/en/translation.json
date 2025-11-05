@@ -137,6 +137,8 @@
     "calculating": "Calculating Savings...",
     "error": "Error loading or calculating savings:",
     "noSavingsFound": "No routes with significant savings found for the selected payment method.",
+    "filterTitle": "Filter by Payment Method",
+    "totalRoutes": "routes with savings found",
     "header": {
       "from": "From",
       "to": "To",
