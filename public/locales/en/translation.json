@@ -135,6 +135,7 @@
   "stationsFound": "station(s) found",
   "savings": {
     "calculating": "Calculating Savings...",
+    "analyzingRoutes": "Analyzing all possible routes across the MTR network...",
     "error": "Error loading or calculating savings:",
     "noSavingsFound": "No routes with significant savings found for the selected payment method.",
     "filterTitle": "Filter by Payment Method",

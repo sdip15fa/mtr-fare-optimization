@@ -219,12 +219,26 @@ const SavingsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', p: 2 }}>
-        <CircularProgress sx={{ color: 'white' }} />
-        <Typography sx={{ ml: 2, color: 'white' }}>
-          {t('savings.calculating', 'Calculating Savings...')}
-        </Typography>
-      </Box>
+      <Fade in timeout={500}>
+        <Card
+          elevation={8}
+          sx={{
+            p: 6,
+            borderRadius: 3,
+            background: 'white',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+            textAlign: 'center',
+          }}
+        >
+          <CircularProgress size={60} sx={{ color: '#667eea' }} />
+          <Typography variant="h6" sx={{ mt: 3, fontWeight: 600, color: '#333' }}>
+            {t('savings.calculating', 'Calculating Savings...')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {t('savings.analyzingRoutes', 'Analyzing all possible routes across the MTR network...')}
+          </Typography>
+        </Card>
+      </Fade>
     );
   }
 
@@ -270,11 +284,11 @@ const SavingsPage: React.FC = () => {
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
             <TrendingDownIcon sx={{ fontSize: 40, color: '#4caf50' }} />
             <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
                 {t('savings.filterTitle', 'Filter by Payment Method')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {t('savings.totalRoutes', `${sortedSavings.length} routes with savings found`)}
+                {sortedSavings.length} {t('savings.totalRoutes', 'routes with savings found')}
               </Typography>
             </Box>
             <FormControl sx={{ minWidth: 250 }}>
@@ -318,8 +332,9 @@ const SavingsPage: React.FC = () => {
             elevation={8}
             sx={{
               borderRadius: 3,
-              overflow: 'hidden',
+              overflow: 'auto',
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+              maxWidth: '100%',
             }}
           >
             <Table sx={{ minWidth: 750 }} aria-label="savings table" size="small">
