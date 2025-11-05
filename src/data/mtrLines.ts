@@ -9,7 +9,15 @@ export interface MTRLine {
   nameZh: string;
   color: string;
   textColor: string; // For contrast on colored backgrounds
-  stations: string[]; // Station names in order
+  stations: string[]; // Station names in order (main line)
+  branches?: Branch[]; // Optional: divergent route branches
+}
+
+export interface Branch {
+  name: string; // Branch name (e.g., "Lo Wu", "Lok Ma Chau")
+  nameZh: string; // Chinese name
+  branchPoint: string; // Station where branch diverges
+  stations: string[]; // Stations unique to this branch (excluding common stations)
 }
 
 interface StationCSVRow {
@@ -151,30 +159,101 @@ export async function loadStationData(): Promise<void> {
       const lineDirections = lineStationsMap.get(lineId);
 
       let stations: string[] = [];
+      let branches: Branch[] | undefined;
 
       if (lineDirections) {
-        // Collect all unique stations from all directions to handle divergent routes
-        // (e.g., East Rail Line has both Lo Wu and Lok Ma Chau branches)
-        const stationMap = new Map<string, number>();
+        // Identify divergent route patterns (e.g., "LMC-DT" for Lok Ma Chau branch)
+        const baseDirections = new Set(['DT', 'UT']); // Standard directions
+        const divergentDirections: string[] = [];
 
-        lineDirections.forEach((stationsData) => {
-          stationsData.forEach(({ station, sequence }) => {
-            // Keep the minimum sequence number for each station (for ordering)
-            if (!stationMap.has(station) || stationMap.get(station)! > sequence) {
-              stationMap.set(station, sequence);
+        lineDirections.forEach((_, direction) => {
+          if (!baseDirections.has(direction) && direction.includes('-')) {
+            // This is a divergent direction (e.g., "LMC-DT", "TKS-DT")
+            const baseDir = direction.split('-')[1]; // Get "DT" from "LMC-DT"
+            if (baseDir === 'DT') { // Only process downtrack directions
+              divergentDirections.push(direction);
             }
-          });
+          }
         });
 
-        // Sort stations by their sequence number to maintain proper order
-        stations = Array.from(stationMap.entries())
-          .sort((a, b) => a[1] - b[1])
-          .map(([station]) => station);
+        // Get base direction stations (use DT if available, otherwise first available)
+        const baseDirStations = lineDirections.get('DT') || Array.from(lineDirections.values())[0];
+
+        if (baseDirStations) {
+          // Collect all stations from base direction
+          const stationSequenceMap = new Map<string, number>();
+          baseDirStations.forEach(({ station, sequence }) => {
+            stationSequenceMap.set(station, sequence);
+          });
+          stations = Array.from(stationSequenceMap.entries())
+            .sort((a, b) => a[1] - b[1])
+            .map(([station]) => station);
+        }
+
+        // Process divergent routes
+        if (divergentDirections.length > 0 && lineDirections.has('DT')) {
+          const tempBranches: Branch[] = [];
+          const baseStationSet = new Set(baseDirStations?.map(s => s.station) || []);
+
+          divergentDirections.forEach(divDir => {
+            const divStations = lineDirections.get(divDir);
+            if (!divStations) return;
+
+            // Find stations unique to this branch
+            const uniqueStations = divStations
+              .filter(({ station }) => !baseStationSet.has(station))
+              .sort((a, b) => a.sequence - b.sequence)
+              .map(({ station }) => station);
+
+            if (uniqueStations.length > 0) {
+              // Find the branch point (last common station before divergence)
+              const allDivStations = divStations.map(s => s.station);
+              let branchPoint = '';
+
+              for (let i = 0; i < allDivStations.length; i++) {
+                if (baseStationSet.has(allDivStations[i])) {
+                  branchPoint = allDivStations[i];
+                  // Check if next station is unique - if so, this is the branch point
+                  if (i + 1 < allDivStations.length && !baseStationSet.has(allDivStations[i + 1])) {
+                    break;
+                  }
+                }
+              }
+
+              // Get branch name from the unique endpoint station
+              const branchName = uniqueStations[0]; // First unique station is usually the endpoint
+
+              // Try to get Chinese name from the CSV data
+              const chineseNameRow = parseResult.data.find(
+                row => row['English Name'] === branchName && row['Line Code'] === lineId
+              );
+
+              tempBranches.push({
+                name: branchName,
+                nameZh: chineseNameRow?.['Chinese Name'] || branchName,
+                branchPoint,
+                stations: uniqueStations,
+              });
+            }
+          });
+
+          // Add all branch stations to the main stations array for backwards compatibility
+          tempBranches.forEach(branch => {
+            branch.stations.forEach(station => {
+              if (!stations.includes(station)) {
+                stations.push(station);
+              }
+            });
+          });
+
+          branches = tempBranches.length > 0 ? tempBranches : undefined;
+        }
       }
 
       return {
         ...metadata,
         stations,
+        branches: branches && branches.length > 0 ? branches : undefined,
       };
     });
 

@@ -302,6 +302,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                     const stationLines = getLinesForStation(station);
                     const isInterchange = stationLines.length > 1;
 
+                    // Check if this station is a branch point
+                    const isBranchPoint = selectedLine.branches?.some(b => b.branchPoint === station);
+
+                    // Check if this station is on a divergent branch
+                    const branchInfo = selectedLine.branches?.find(b => b.stations.includes(station));
+
                     return (
                       <Box
                         key={station}
@@ -312,7 +318,7 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                         }}
                       >
                         {/* Line connector */}
-                        {index < selectedLine.stations.length - 1 && (
+                        {index < selectedLine.stations.length - 1 && !branchInfo && (
                           <Box
                             sx={{
                               position: 'absolute',
@@ -350,8 +356,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                             justifyContent: 'space-between',
                             textTransform: 'none',
                             fontWeight: 500,
-                            borderColor: 'rgba(0, 0, 0, 0.12)',
+                            borderColor: branchInfo ? selectedLine.color : 'rgba(0, 0, 0, 0.12)',
+                            borderStyle: branchInfo ? 'dashed' : 'solid',
+                            borderWidth: branchInfo ? 2 : 1,
                             color: 'text.primary',
+                            backgroundColor: branchInfo ? `${selectedLine.color}08` : 'transparent',
                             '&:hover': {
                               backgroundColor: `${selectedLine.color}15`,
                               borderColor: selectedLine.color,
@@ -362,7 +371,11 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                             },
                           }}
                         >
-                          <span>{getStationName(station)}</span>
+                          <span>
+                            {branchInfo && '↗ '}
+                            {getStationName(station)}
+                            {isBranchPoint && ' ⑂'}
+                          </span>
                           {isInterchange && (
                             <Stack direction="row" spacing={0.5}>
                               {stationLines
