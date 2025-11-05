@@ -130,10 +130,16 @@
   "backToCalculatorLink": "Back to Fare Calculator",
   "savingsPageTitle": "Routes with Savings",
   "savingsPageHtmlTitle": "MTR Savings Routes",
+  "close": "Close",
+  "searchStations": "Search stations...",
+  "stationsFound": "station(s) found",
   "savings": {
     "calculating": "Calculating Savings...",
+    "analyzingRoutes": "Analyzing all possible routes across the MTR network...",
     "error": "Error loading or calculating savings:",
     "noSavingsFound": "No routes with significant savings found for the selected payment method.",
+    "filterTitle": "Filter by Payment Method",
+    "totalRoutes": "routes with savings found",
     "header": {
       "from": "From",
       "to": "To",
