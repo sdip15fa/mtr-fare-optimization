@@ -1,24 +1,10 @@
 import Papa from 'papaparse';
+import { MTR_LINES } from './mtrLines';
 
-// East Rail Line stations (First Class is only available on East Rail Line)
-const EAST_RAIL_STATIONS = new Set([
-  'Admiralty',
-  'Exhibition Centre',
-  'Hung Hom',
-  'Mong Kok East',
-  'Kowloon Tong',
-  'Tai Wai',
-  'Sha Tin',
-  'Fo Tan',
-  'Racecourse',
-  'University',
-  'Tai Po Market',
-  'Tai Wo',
-  'Fanling',
-  'Sheung Shui',
-  'Lo Wu',
-  'Lok Ma Chau'
-]);
+// Get East Rail Line stations dynamically from MTR line data
+const EAST_RAIL_STATIONS = new Set(
+  MTR_LINES.find(line => line.id === 'EAL')?.stations || []
+);
 
 // Check if both stations are on East Rail Line
 function isEastRailRoute(srcStation: string, destStation: string): boolean {
