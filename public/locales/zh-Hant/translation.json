@@ -26,7 +26,11 @@
     "OCT_CON_ELDERLY_FARE": "長者八達通",
     "OCT_CON_PWD_FARE": "殘疾人士八達通",
     "SINGLE_CON_CHILD_FARE": "小童單程票",
-    "SINGLE_CON_ELDERLY_FARE": "長者單程票"
+    "SINGLE_CON_ELDERLY_FARE": "長者單程票",
+    "OCT_ADT_FIRST_FARE": "成人八達通頭等",
+    "OCT_STD_FIRST_FARE": "學生八達通頭等",
+    "OCT_JOYYOU_SIXTY_FIRST_FARE": "樂悠咭 (60+) 頭等",
+    "SINGLE_ADT_FIRST_FARE": "成人單程票頭等"
   },
   "stations": {
     "Kennedy Town": "堅尼地城",

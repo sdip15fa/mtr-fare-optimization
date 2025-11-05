@@ -26,7 +26,11 @@
     "OCT_CON_ELDERLY_FARE": "Elderly Octopus",
     "OCT_CON_PWD_FARE": "PWD Octopus",
     "SINGLE_CON_CHILD_FARE": "Child Single Journey",
-    "SINGLE_CON_ELDERLY_FARE": "Elderly Single Journey"
+    "SINGLE_CON_ELDERLY_FARE": "Elderly Single Journey",
+    "OCT_ADT_FIRST_FARE": "Adult Octopus First Class",
+    "OCT_STD_FIRST_FARE": "Student Octopus First Class",
+    "OCT_JOYYOU_SIXTY_FIRST_FARE": "JoyYou (60+) Octopus First Class",
+    "SINGLE_ADT_FIRST_FARE": "Adult Single Journey First Class"
   },
   "stations": {
     "Kennedy Town": "Kennedy Town",

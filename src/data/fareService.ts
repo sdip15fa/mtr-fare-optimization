@@ -1,6 +1,31 @@
 import Papa from 'papaparse';
 
-// Define the structure of a fare record
+// East Rail Line stations (First Class is only available on East Rail Line)
+const EAST_RAIL_STATIONS = new Set([
+  'Admiralty',
+  'Exhibition Centre',
+  'Hung Hom',
+  'Mong Kok East',
+  'Kowloon Tong',
+  'Tai Wai',
+  'Sha Tin',
+  'Fo Tan',
+  'Racecourse',
+  'University',
+  'Tai Po Market',
+  'Tai Wo',
+  'Fanling',
+  'Sheung Shui',
+  'Lo Wu',
+  'Lok Ma Chau'
+]);
+
+// Check if both stations are on East Rail Line
+function isEastRailRoute(srcStation: string, destStation: string): boolean {
+  return EAST_RAIL_STATIONS.has(srcStation) && EAST_RAIL_STATIONS.has(destStation);
+}
+
+// Define the structure of a fare record (as it appears in CSV)
 export interface FareRecord {
   SRC_STATION_NAME: string;
   SRC_STATION_ID: string;
@@ -27,7 +52,11 @@ export type PaymentMethod =
   | 'OCT_CON_ELDERLY_FARE'
   | 'OCT_CON_PWD_FARE'
   | 'SINGLE_CON_CHILD_FARE'
-  | 'SINGLE_CON_ELDERLY_FARE';
+  | 'SINGLE_CON_ELDERLY_FARE'
+  | 'OCT_ADT_FIRST_FARE'
+  | 'OCT_STD_FIRST_FARE'
+  | 'OCT_JOYYOU_SIXTY_FIRST_FARE'
+  | 'SINGLE_ADT_FIRST_FARE';
 
 // Store the parsed data
 let fareData: FareRecord[] = [];
@@ -81,18 +110,44 @@ export async function loadFareData(): Promise<void> {
             }
           });
 
-          // Populate the fare map for quick lookups (consider all payment methods)
-          const paymentMethods: PaymentMethod[] = [
+          // Populate the fare map for quick lookups
+          // First, add all standard fares from CSV
+          const csvPaymentMethods: (keyof FareRecord)[] = [
             'OCT_ADT_FARE', 'OCT_STD_FARE', 'OCT_JOYYOU_SIXTY_FARE',
             'SINGLE_ADT_FARE', 'OCT_CON_CHILD_FARE', 'OCT_CON_ELDERLY_FARE',
             'OCT_CON_PWD_FARE', 'SINGLE_CON_CHILD_FARE', 'SINGLE_CON_ELDERLY_FARE'
           ];
           fareData.forEach(record => {
-            paymentMethods.forEach(method => {
+            csvPaymentMethods.forEach(method => {
               const key = `${record.SRC_STATION_ID}-${record.DEST_STATION_ID}-${method}`;
               const fare = record[method];
               // Ensure fare is treated as a number, handle potential null/undefined from parsing
               fareMap.set(key, typeof fare === 'number' ? fare : 0);
+            });
+          });
+
+          // Calculate and add first class fares (2x standard fare for East Rail routes only)
+          const firstClassMapping: { first: PaymentMethod; standard: keyof FareRecord }[] = [
+            { first: 'OCT_ADT_FIRST_FARE', standard: 'OCT_ADT_FARE' },
+            { first: 'OCT_STD_FIRST_FARE', standard: 'OCT_STD_FARE' },
+            { first: 'OCT_JOYYOU_SIXTY_FIRST_FARE', standard: 'OCT_JOYYOU_SIXTY_FARE' },
+            { first: 'SINGLE_ADT_FIRST_FARE', standard: 'SINGLE_ADT_FARE' }
+          ];
+
+          fareData.forEach(record => {
+            const isEastRail = isEastRailRoute(record.SRC_STATION_NAME, record.DEST_STATION_NAME);
+
+            firstClassMapping.forEach(({ first, standard }) => {
+              const key = `${record.SRC_STATION_ID}-${record.DEST_STATION_ID}-${first}`;
+              const standardFare = record[standard];
+
+              if (isEastRail && typeof standardFare === 'number') {
+                // First class = 2x standard fare for East Rail routes
+                fareMap.set(key, standardFare * 2);
+              } else {
+                // Not available for non-East Rail routes
+                fareMap.set(key, 0);
+              }
             });
           });
 

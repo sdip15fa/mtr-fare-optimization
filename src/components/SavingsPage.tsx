@@ -97,6 +97,10 @@ const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
   { value: 'OCT_CON_PWD_FARE', label: 'PWD Octopus' },
   { value: 'SINGLE_CON_CHILD_FARE', label: 'Child Single Journey' },
   { value: 'SINGLE_CON_ELDERLY_FARE', label: 'Elderly Single Journey' },
+  { value: 'OCT_ADT_FIRST_FARE', label: 'Adult Octopus First Class' },
+  { value: 'OCT_STD_FIRST_FARE', label: 'Student Octopus First Class' },
+  { value: 'OCT_JOYYOU_SIXTY_FIRST_FARE', label: 'JoyYou (60+) Octopus First Class' },
+  { value: 'SINGLE_ADT_FIRST_FARE', label: 'Adult Single Journey First Class' },
 ];
 
 const SavingsPage: React.FC = () => {
