@@ -64,7 +64,7 @@ const LINE_METADATA: Record<string, Omit<MTRLine, 'stations'>> = {
     nameEn: 'East Rail Line',
     nameZh: '東鐵綫',
     color: '#5EB7E8',
-    textColor: '#000000',
+    textColor: '#FFFFFF',
   },
   TCL: {
     id: 'TCL',

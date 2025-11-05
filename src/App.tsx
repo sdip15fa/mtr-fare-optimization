@@ -355,65 +355,58 @@ function App() {
                 )}
 
                 <Grid container spacing={3}>
-                  {/* Station Selectors */}
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <StationSelector
-                      value={startStation}
-                      onChange={setStartStation}
-                      label={t('startStationLabel')}
-                      excludeStation={destStation}
-                    />
-                  </Grid>
-
-                  <Grid
-                    size={{ xs: 12, md: 6 }}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                    }}
-                  >
-                    {/* Swap button for mobile/desktop */}
-                    <IconButton
-                      onClick={() => {
-                        const temp = startStation;
-                        setStartStation(destStation);
-                        setDestStation(temp);
-                      }}
+                  {/* Station Selectors - Desktop Flex Layout */}
+                  <Grid size={{ xs: 12 }}>
+                    <Box
                       sx={{
-                        position: { xs: 'static', md: 'absolute' },
-                        left: { md: -28 },
-                        backgroundColor: 'white',
-                        border: '2px solid #667eea',
-                        color: '#667eea',
-                        '&:hover': {
-                          backgroundColor: '#667eea',
-                          color: 'white',
-                        },
-                        mb: { xs: 2, md: 0 },
-                        transform: { xs: 'rotate(90deg)', md: 'none' },
+                        display: { xs: 'flex', md: 'flex' },
+                        flexDirection: { xs: 'column', md: 'row' },
+                        alignItems: 'center',
+                        gap: { xs: 2, md: 2 },
                       }}
                     >
-                      <SwapHorizIcon />
-                    </IconButton>
-                    <Box sx={{ width: '100%', display: { xs: 'none', md: 'block' } }}>
-                      <StationSelector
-                        value={destStation}
-                        onChange={setDestStation}
-                        label={t('destStationLabel')}
-                        excludeStation={startStation}
-                      />
-                    </Box>
-                  </Grid>
+                      {/* Start Station */}
+                      <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 0' }, width: { xs: '100%', md: 'auto' } }}>
+                        <StationSelector
+                          value={startStation}
+                          onChange={setStartStation}
+                          label={t('startStationLabel')}
+                          excludeStation={destStation}
+                        />
+                      </Box>
 
-                  <Grid size={{ xs: 12, md: 6 }} sx={{ display: { xs: 'block', md: 'none' } }}>
-                    <StationSelector
-                      value={destStation}
-                      onChange={setDestStation}
-                      label={t('destStationLabel')}
-                      excludeStation={startStation}
-                    />
+                      {/* Swap Button */}
+                      <IconButton
+                        onClick={() => {
+                          const temp = startStation;
+                          setStartStation(destStation);
+                          setDestStation(temp);
+                        }}
+                        sx={{
+                          backgroundColor: 'white',
+                          border: '2px solid #667eea',
+                          color: '#667eea',
+                          '&:hover': {
+                            backgroundColor: '#667eea',
+                            color: 'white',
+                          },
+                          transform: { xs: 'rotate(90deg)', md: 'none' },
+                          flexShrink: 0,
+                        }}
+                      >
+                        <SwapHorizIcon />
+                      </IconButton>
+
+                      {/* Destination Station */}
+                      <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 0' }, width: { xs: '100%', md: 'auto' } }}>
+                        <StationSelector
+                          value={destStation}
+                          onChange={setDestStation}
+                          label={t('destStationLabel')}
+                          excludeStation={startStation}
+                        />
+                      </Box>
+                    </Box>
                   </Grid>
 
                   {/* Payment Method */}
