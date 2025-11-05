@@ -174,14 +174,37 @@ export function getStationId(stationName: string): string | undefined {
 }
 
 
+// Mapping from first class to standard fare payment methods
+const firstClassToStandardMap: Record<string, PaymentMethod> = {
+  'OCT_ADT_FIRST_FARE': 'OCT_ADT_FARE',
+  'OCT_STD_FIRST_FARE': 'OCT_STD_FARE',
+  'OCT_JOYYOU_SIXTY_FIRST_FARE': 'OCT_JOYYOU_SIXTY_FARE',
+  'SINGLE_ADT_FIRST_FARE': 'SINGLE_ADT_FARE'
+};
+
 // Function to get the fare between two stations for a specific payment method
+// For first class payment methods: uses first class fare if available (East Rail Line),
+// otherwise falls back to corresponding standard fare for non-EAL segments
 export function getFare(
   startStationId: string,
   destStationId: string,
   paymentMethod: PaymentMethod
 ): number | undefined {
   const key = `${startStationId}-${destStationId}-${paymentMethod}`;
-  return fareMap.get(key);
+  const fare = fareMap.get(key);
+
+  // If first class payment method is selected but fare is 0 (not available on this segment),
+  // fall back to the corresponding standard fare
+  const isFirstClass = paymentMethod.includes('FIRST');
+  if (isFirstClass && fare === 0) {
+    const standardMethod = firstClassToStandardMap[paymentMethod];
+    if (standardMethod) {
+      const standardKey = `${startStationId}-${destStationId}-${standardMethod}`;
+      return fareMap.get(standardKey);
+    }
+  }
+
+  return fare;
 }
 
 // Function to get all fare records (useful for brute-force)
