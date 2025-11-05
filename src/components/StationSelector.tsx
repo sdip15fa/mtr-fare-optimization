@@ -297,107 +297,305 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                 </Box>
 
                 <Stack spacing={1}>
-                  {selectedLine.stations.map((station, index) => {
-                    const isDisabled = station === excludeStation;
-                    const stationLines = getLinesForStation(station);
-                    const isInterchange = stationLines.length > 1;
+                  {selectedLine.branches ? (
+                    // Line has branches - show trunk then branches
+                    <>
+                      {/* Trunk stations */}
+                      {selectedLine.branches.trunk.map((station, index) => {
+                        const isDisabled = station === excludeStation;
+                        const stationLines = getLinesForStation(station);
+                        const isInterchange = stationLines.length > 1;
+                        const isBranchPoint = station === selectedLine.branches!.branchPoint;
 
-                    // Check if this station is a branch point
-                    const isBranchPoint = selectedLine.branches?.some(b => b.branchPoint === station);
-
-                    // Check if this station is on a divergent branch
-                    const branchInfo = selectedLine.branches?.find(b => b.stations.includes(station));
-
-                    return (
-                      <Box
-                        key={station}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          position: 'relative',
-                        }}
-                      >
-                        {/* Line connector */}
-                        {index < selectedLine.stations.length - 1 && !branchInfo && (
+                        return (
                           <Box
+                            key={`trunk-${station}`}
                             sx={{
-                              position: 'absolute',
-                              left: 15,
-                              top: 32,
-                              width: 3,
-                              height: 'calc(100% + 8px)',
-                              backgroundColor: selectedLine.color,
+                              display: 'flex',
+                              alignItems: 'center',
+                              position: 'relative',
                             }}
-                          />
-                        )}
+                          >
+                            {/* Line connector */}
+                            {index < selectedLine.branches!.trunk.length - 1 && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  left: 15,
+                                  top: 32,
+                                  width: 3,
+                                  height: 'calc(100% + 8px)',
+                                  backgroundColor: selectedLine.color,
+                                }}
+                              />
+                            )}
 
-                        {/* Station dot */}
-                        <Box
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            backgroundColor: selectedLine.color,
-                            border: isInterchange ? `4px solid white` : 'none',
-                            boxShadow: isInterchange ? `0 0 0 2px ${selectedLine.color}` : 'none',
-                            flexShrink: 0,
-                            mr: 2,
-                            zIndex: 1,
-                          }}
-                        />
+                            {/* Station dot */}
+                            <Box
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: '50%',
+                                backgroundColor: selectedLine.color,
+                                border: isInterchange ? `4px solid white` : 'none',
+                                boxShadow: isInterchange ? `0 0 0 2px ${selectedLine.color}` : 'none',
+                                flexShrink: 0,
+                                mr: 2,
+                                zIndex: 1,
+                              }}
+                            />
 
-                        {/* Station button */}
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          disabled={isDisabled}
-                          onClick={() => handleStationSelect(station)}
-                          sx={{
-                            justifyContent: 'space-between',
-                            textTransform: 'none',
-                            fontWeight: 500,
-                            borderColor: branchInfo ? selectedLine.color : 'rgba(0, 0, 0, 0.12)',
-                            borderStyle: branchInfo ? 'dashed' : 'solid',
-                            borderWidth: branchInfo ? 2 : 1,
-                            color: 'text.primary',
-                            backgroundColor: branchInfo ? `${selectedLine.color}08` : 'transparent',
-                            '&:hover': {
-                              backgroundColor: `${selectedLine.color}15`,
-                              borderColor: selectedLine.color,
-                            },
-                            '&.Mui-disabled': {
-                              borderColor: 'rgba(0, 0, 0, 0.12)',
-                              color: 'text.disabled',
-                            },
-                          }}
-                        >
-                          <span>
-                            {branchInfo && '↗ '}
-                            {getStationName(station)}
-                            {isBranchPoint && ' ⑂'}
-                          </span>
-                          {isInterchange && (
-                            <Stack direction="row" spacing={0.5}>
-                              {stationLines
-                                .filter(l => l.id !== selectedLineId)
-                                .slice(0, 2)
-                                .map(line => (
+                            {/* Station button */}
+                            <Button
+                              fullWidth
+                              variant="outlined"
+                              disabled={isDisabled}
+                              onClick={() => handleStationSelect(station)}
+                              sx={{
+                                justifyContent: 'space-between',
+                                textTransform: 'none',
+                                fontWeight: 500,
+                                borderColor: 'rgba(0, 0, 0, 0.12)',
+                                color: 'text.primary',
+                                '&:hover': {
+                                  backgroundColor: `${selectedLine.color}15`,
+                                  borderColor: selectedLine.color,
+                                },
+                                '&.Mui-disabled': {
+                                  borderColor: 'rgba(0, 0, 0, 0.12)',
+                                  color: 'text.disabled',
+                                },
+                              }}
+                            >
+                              <span>
+                                {getStationName(station)}
+                                {isBranchPoint && ' ⑂'}
+                              </span>
+                              {isInterchange && (
+                                <Stack direction="row" spacing={0.5}>
+                                  {stationLines
+                                    .filter(l => l.id !== selectedLineId)
+                                    .slice(0, 2)
+                                    .map(line => (
+                                      <Box
+                                        key={line.id}
+                                        sx={{
+                                          width: 8,
+                                          height: 8,
+                                          borderRadius: '50%',
+                                          backgroundColor: line.color,
+                                        }}
+                                      />
+                                    ))}
+                                </Stack>
+                              )}
+                            </Button>
+                          </Box>
+                        );
+                      })}
+
+                      {/* Branch divider */}
+                      <Box sx={{ pl: 6, py: 1 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                          {t('branches', 'Branches:')}
+                        </Typography>
+                      </Box>
+
+                      {/* Each branch */}
+                      {selectedLine.branches.branches.map((branch, branchIdx) => (
+                        <Box key={`branch-${branchIdx}`} sx={{ pl: 4 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ pl: 2, pb: 0.5, display: 'block' }}>
+                            → {currentLanguage === 'zh' ? branch.nameZh : branch.name}
+                          </Typography>
+                          <Stack spacing={1}>
+                            {branch.stations.map((station, stationIdx) => {
+                              const isDisabled = station === excludeStation;
+                              const stationLines = getLinesForStation(station);
+                              const isInterchange = stationLines.length > 1;
+
+                              return (
+                                <Box
+                                  key={`branch-${branchIdx}-${station}`}
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                  }}
+                                >
+                                  {/* Branch line connector */}
+                                  {stationIdx < branch.stations.length - 1 && (
+                                    <Box
+                                      sx={{
+                                        position: 'absolute',
+                                        left: 15,
+                                        top: 32,
+                                        width: 3,
+                                        height: 'calc(100% + 8px)',
+                                        backgroundColor: selectedLine.color,
+                                        opacity: 0.6,
+                                      }}
+                                    />
+                                  )}
+
+                                  {/* Station dot */}
                                   <Box
-                                    key={line.id}
                                     sx={{
-                                      width: 8,
-                                      height: 8,
+                                      width: 32,
+                                      height: 32,
                                       borderRadius: '50%',
-                                      backgroundColor: line.color,
+                                      backgroundColor: selectedLine.color,
+                                      border: isInterchange ? `4px solid white` : 'none',
+                                      boxShadow: isInterchange ? `0 0 0 2px ${selectedLine.color}` : 'none',
+                                      opacity: 0.8,
+                                      flexShrink: 0,
+                                      mr: 2,
+                                      zIndex: 1,
                                     }}
                                   />
-                                ))}
-                            </Stack>
+
+                                  {/* Station button */}
+                                  <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    disabled={isDisabled}
+                                    onClick={() => handleStationSelect(station)}
+                                    sx={{
+                                      justifyContent: 'space-between',
+                                      textTransform: 'none',
+                                      fontWeight: 500,
+                                      borderColor: selectedLine.color,
+                                      borderStyle: 'dashed',
+                                      borderWidth: 2,
+                                      color: 'text.primary',
+                                      backgroundColor: `${selectedLine.color}08`,
+                                      '&:hover': {
+                                        backgroundColor: `${selectedLine.color}20`,
+                                        borderColor: selectedLine.color,
+                                      },
+                                      '&.Mui-disabled': {
+                                        borderColor: 'rgba(0, 0, 0, 0.12)',
+                                        color: 'text.disabled',
+                                      },
+                                    }}
+                                  >
+                                    <span>{getStationName(station)}</span>
+                                    {isInterchange && (
+                                      <Stack direction="row" spacing={0.5}>
+                                        {stationLines
+                                          .filter(l => l.id !== selectedLineId)
+                                          .slice(0, 2)
+                                          .map(line => (
+                                            <Box
+                                              key={line.id}
+                                              sx={{
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: '50%',
+                                                backgroundColor: line.color,
+                                              }}
+                                            />
+                                          ))}
+                                      </Stack>
+                                    )}
+                                  </Button>
+                                </Box>
+                              );
+                            })}
+                          </Stack>
+                        </Box>
+                      ))}
+                    </>
+                  ) : (
+                    // No branches - show all stations normally
+                    selectedLine.stations.map((station, index) => {
+                      const isDisabled = station === excludeStation;
+                      const stationLines = getLinesForStation(station);
+                      const isInterchange = stationLines.length > 1;
+
+                      return (
+                        <Box
+                          key={station}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            position: 'relative',
+                          }}
+                        >
+                          {/* Line connector */}
+                          {index < selectedLine.stations.length - 1 && (
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                left: 15,
+                                top: 32,
+                                width: 3,
+                                height: 'calc(100% + 8px)',
+                                backgroundColor: selectedLine.color,
+                              }}
+                            />
                           )}
-                        </Button>
-                      </Box>
-                    );
-                  })}
+
+                          {/* Station dot */}
+                          <Box
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: '50%',
+                              backgroundColor: selectedLine.color,
+                              border: isInterchange ? `4px solid white` : 'none',
+                              boxShadow: isInterchange ? `0 0 0 2px ${selectedLine.color}` : 'none',
+                              flexShrink: 0,
+                              mr: 2,
+                              zIndex: 1,
+                            }}
+                          />
+
+                          {/* Station button */}
+                          <Button
+                            fullWidth
+                            variant="outlined"
+                            disabled={isDisabled}
+                            onClick={() => handleStationSelect(station)}
+                            sx={{
+                              justifyContent: 'space-between',
+                              textTransform: 'none',
+                              fontWeight: 500,
+                              borderColor: 'rgba(0, 0, 0, 0.12)',
+                              color: 'text.primary',
+                              '&:hover': {
+                                backgroundColor: `${selectedLine.color}15`,
+                                borderColor: selectedLine.color,
+                              },
+                              '&.Mui-disabled': {
+                                borderColor: 'rgba(0, 0, 0, 0.12)',
+                                color: 'text.disabled',
+                              },
+                            }}
+                          >
+                            <span>{getStationName(station)}</span>
+                            {isInterchange && (
+                              <Stack direction="row" spacing={0.5}>
+                                {stationLines
+                                  .filter(l => l.id !== selectedLineId)
+                                  .slice(0, 2)
+                                  .map(line => (
+                                    <Box
+                                      key={line.id}
+                                      sx={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: '50%',
+                                        backgroundColor: line.color,
+                                      }}
+                                    />
+                                  ))}
+                              </Stack>
+                            )}
+                          </Button>
+                        </Box>
+                      );
+                    })
+                  )}
                 </Stack>
               </Box>
             </>
