@@ -298,106 +298,12 @@ const StationSelector: React.FC<StationSelectorProps> = ({
 
                 <Stack spacing={1}>
                   {selectedLine.branches ? (
-                    // Line has branches - show trunk then branches
+                    // Line has branches - show branches first, then trunk
                     <>
-                      {/* Trunk stations */}
-                      {selectedLine.branches.trunk.map((station, index) => {
-                        const isDisabled = station === excludeStation;
-                        const stationLines = getLinesForStation(station);
-                        const isInterchange = stationLines.length > 1;
-                        const isBranchPoint = station === selectedLine.branches!.branchPoint;
-
-                        return (
-                          <Box
-                            key={`trunk-${station}`}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              position: 'relative',
-                            }}
-                          >
-                            {/* Line connector */}
-                            {index < selectedLine.branches!.trunk.length - 1 && (
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  left: 15,
-                                  top: 32,
-                                  width: 3,
-                                  height: 'calc(100% + 8px)',
-                                  backgroundColor: selectedLine.color,
-                                }}
-                              />
-                            )}
-
-                            {/* Station dot */}
-                            <Box
-                              sx={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: '50%',
-                                backgroundColor: selectedLine.color,
-                                border: isInterchange ? `4px solid white` : 'none',
-                                boxShadow: isInterchange ? `0 0 0 2px ${selectedLine.color}` : 'none',
-                                flexShrink: 0,
-                                mr: 2,
-                                zIndex: 1,
-                              }}
-                            />
-
-                            {/* Station button */}
-                            <Button
-                              fullWidth
-                              variant="outlined"
-                              disabled={isDisabled}
-                              onClick={() => handleStationSelect(station)}
-                              sx={{
-                                justifyContent: 'space-between',
-                                textTransform: 'none',
-                                fontWeight: 500,
-                                borderColor: 'rgba(0, 0, 0, 0.12)',
-                                color: 'text.primary',
-                                '&:hover': {
-                                  backgroundColor: `${selectedLine.color}15`,
-                                  borderColor: selectedLine.color,
-                                },
-                                '&.Mui-disabled': {
-                                  borderColor: 'rgba(0, 0, 0, 0.12)',
-                                  color: 'text.disabled',
-                                },
-                              }}
-                            >
-                              <span>
-                                {getStationName(station)}
-                                {isBranchPoint && ' ⑂'}
-                              </span>
-                              {isInterchange && (
-                                <Stack direction="row" spacing={0.5}>
-                                  {stationLines
-                                    .filter(l => l.id !== selectedLineId)
-                                    .slice(0, 2)
-                                    .map(line => (
-                                      <Box
-                                        key={line.id}
-                                        sx={{
-                                          width: 8,
-                                          height: 8,
-                                          borderRadius: '50%',
-                                          backgroundColor: line.color,
-                                        }}
-                                      />
-                                    ))}
-                                </Stack>
-                              )}
-                            </Button>
-                          </Box>
-                        );
-                      })}
-
                       {/* Branch divider */}
                       <Box sx={{ pl: 6, py: 1 }}>
                         <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                          {t('branches', 'Branches:')}
+                          {t('branchesTo', `Branches (merge at ${getStationName(selectedLine.branches.branchPoint)}):`)}
                         </Typography>
                       </Box>
 
@@ -504,6 +410,100 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                           </Stack>
                         </Box>
                       ))}
+
+                      {/* Trunk stations (after branch point) */}
+                      {selectedLine.branches.trunk.map((station, index) => {
+                        const isDisabled = station === excludeStation;
+                        const stationLines = getLinesForStation(station);
+                        const isInterchange = stationLines.length > 1;
+                        const isBranchPoint = station === selectedLine.branches!.branchPoint;
+
+                        return (
+                          <Box
+                            key={`trunk-${station}`}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              position: 'relative',
+                            }}
+                          >
+                            {/* Line connector */}
+                            {index < selectedLine.branches!.trunk.length - 1 && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  left: 15,
+                                  top: 32,
+                                  width: 3,
+                                  height: 'calc(100% + 8px)',
+                                  backgroundColor: selectedLine.color,
+                                }}
+                              />
+                            )}
+
+                            {/* Station dot */}
+                            <Box
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: '50%',
+                                backgroundColor: selectedLine.color,
+                                border: isInterchange ? `4px solid white` : 'none',
+                                boxShadow: isInterchange ? `0 0 0 2px ${selectedLine.color}` : 'none',
+                                flexShrink: 0,
+                                mr: 2,
+                                zIndex: 1,
+                              }}
+                            />
+
+                            {/* Station button */}
+                            <Button
+                              fullWidth
+                              variant="outlined"
+                              disabled={isDisabled}
+                              onClick={() => handleStationSelect(station)}
+                              sx={{
+                                justifyContent: 'space-between',
+                                textTransform: 'none',
+                                fontWeight: 500,
+                                borderColor: 'rgba(0, 0, 0, 0.12)',
+                                color: 'text.primary',
+                                '&:hover': {
+                                  backgroundColor: `${selectedLine.color}15`,
+                                  borderColor: selectedLine.color,
+                                },
+                                '&.Mui-disabled': {
+                                  borderColor: 'rgba(0, 0, 0, 0.12)',
+                                  color: 'text.disabled',
+                                },
+                              }}
+                            >
+                              <span>
+                                {getStationName(station)}
+                                {isBranchPoint && ' ⑂'}
+                              </span>
+                              {isInterchange && (
+                                <Stack direction="row" spacing={0.5}>
+                                  {stationLines
+                                    .filter(l => l.id !== selectedLineId)
+                                    .slice(0, 2)
+                                    .map(line => (
+                                      <Box
+                                        key={line.id}
+                                        sx={{
+                                          width: 8,
+                                          height: 8,
+                                          borderRadius: '50%',
+                                          backgroundColor: line.color,
+                                        }}
+                                      />
+                                    ))}
+                                </Stack>
+                              )}
+                            </Button>
+                          </Box>
+                        );
+                      })}
                     </>
                   ) : (
                     // No branches - show all stations normally
