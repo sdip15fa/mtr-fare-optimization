@@ -133,6 +133,7 @@
   "close": "Close",
   "searchStations": "Search stations...",
   "stationsFound": "station(s) found",
+  "branchesTo": "Branches (merge at {{branchPoint}}):",
   "savings": {
     "calculating": "Calculating Savings...",
     "analyzingRoutes": "Analyzing all possible routes across the MTR network...",

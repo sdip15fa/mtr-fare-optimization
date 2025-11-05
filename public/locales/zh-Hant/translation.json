@@ -133,6 +133,7 @@
   "close": "關閉",
   "searchStations": "搜尋車站...",
   "stationsFound": "個車站",
+  "branchesTo": "分支路線（匯合於{{branchPoint}}）：",
   "savings": {
     "calculating": "正在計算慳錢路線...",
     "analyzingRoutes": "正在分析港鐵網絡中所有可能的路線...",

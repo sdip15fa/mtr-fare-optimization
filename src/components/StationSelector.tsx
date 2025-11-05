@@ -303,7 +303,9 @@ const StationSelector: React.FC<StationSelectorProps> = ({
                       {/* Branch divider */}
                       <Box sx={{ pl: 6, py: 1 }}>
                         <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                          {t('branchesTo', `Branches (merge at ${getStationName(selectedLine.branches.branchPoint)}):`)}
+                          {t('branchesTo', {
+                            branchPoint: getStationName(selectedLine.branches.branchPoint)
+                          })}
                         </Typography>
                       </Box>
 
